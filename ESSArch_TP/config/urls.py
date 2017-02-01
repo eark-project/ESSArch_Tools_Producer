@@ -1,8 +1,8 @@
-#!/usr/bin/env /ESSArch/python27/bin/python
-# -*- coding: UTF-8 -*-
-'''
-    ESSArch Tools - ESSArch is an Electronic Preservation Platform
-    Copyright (C) 2005-2013  ES Solutions AB
+"""
+    ESSArch is an open source archiving and digital preservation system
+
+    ESSArch Tools for Producer (ETP)
+    Copyright (C) 2005-2017 ES Solutions AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,102 +15,99 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    along with this program. If not, see <http://www.gnu.org/licenses/>.
 
     Contact information:
     Web - http://www.essolutions.se
     Email - essarch@essolutions.se
-'''
+"""
 
-from django.conf.urls import patterns, include, url, handler404
-from django.views.generic import DetailView, ListView
-from django.conf import settings
+"""etp URL Configuration
 
-# Uncomment the next two lines to enable the admin:
+The `urlpatterns` list routes URLs to views. For more information please see:
+    https://docs.djangoproject.com/en/1.9/topics/http/urls/
+Examples:
+Function views
+    1. Add an import:  from my_app import views
+    2. Add a URL to urlpatterns:  url(r'^$', views.home, name='home')
+Class-based views
+    1. Add an import:  from other_app.views import Home
+    2. Add a URL to urlpatterns:  url(r'^$', Home.as_view(), name='home')
+Including another URLconf
+    1. Import the include() function: from django.conf.urls import url, include
+    2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
+"""
+from django.conf.urls import include, url
 from django.contrib import admin
-admin.autodiscover()
+from django.contrib.auth import views as auth_views
 
-#from create.views import CreateTmpWorkareaUploadView, CreateTmpWorkareaUploadCompleteView, ETPChunkedUploadView, ETPChunkedUploadCompleteView
-#from create.views import ETPChunkedUploadView, ETPChunkedUploadCompleteView
-from create.views import IPcontentasJSON, ETPUploadView, ETPUploadCompleteView
-from configuration.views import about, installedpackages
-urlpatterns = patterns('',
-    # Standard URLS:
-    url(r'^$', 'configuration.views.index', name='home'),
-    #url(r'^logout$', 'configuration.views.logout_view'),
-    url(r'^logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'}),
-    url(r'^accounts/login/$', 'django.contrib.auth.views.login' ),
-    url(r'^accounts/logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'} ),
-    url(r'^admin/logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'} ),
-    url(r'^changepassword$', 'configuration.views.change_password'),
-    
-    # URLS to include:
-    #url(r'^receive/', include('receive.urls')),
-    url(r'^submit/', include('submit.urls')),
-    url(r'^create/', include('create.urls')),
-    #url(r'^api/', include('api.urls')),
+from rest_framework import routers
 
-    # Configuration URLS:    
-    url(r'^about$', 'configuration.views.sysinfo'),
-    #url(r'^configuration/logevents$', 'configuration.views.logevents'),
-    url(r'^configuration/logevents/install_defaults$', 'configuration.views.installogdefaults'),
-    url(r'^configuration/logevents/install_defaultschemas$', 'configuration.views.installdefaultschemaprofiles'),
-    url(r'^configuration/logevents/install_defaultparameters$', 'configuration.views.installdefaultparameters'),
-    url(r'^configuration/logevents/install_defaultusers$', 'configuration.views.createdefaultusers'),
-    url(r'^installedpackages/(?P<ipid>[^&]*)$', installedpackages.as_view(), name='installedpackages'),
-    #url(r'^configuration/logevents/install_defaultadditionalmetadata$', 'configuration.views.installAdditionalMetadata'),
-    #url(r'^configuration/logevents/add$', 'configuration.views.newlogevent'),
-    #url(r'^configuration/logevents/(?P<eventId>\d+)$', 'configuration.views.editlogevent' ),
-    #url(r'^configuration/logevents/(?P<eventId>\d+)/del$', 'configuration.views.deletelogevent' ),
-    #url(r'^configuration/parameters$', 'configuration.views.parameters'),
-    #url(r'^configuration/parameters/(?P<username>\w+)$', 'configuration.views.userparameters'),
-
-    # Prepare IP URLS:
-    #url(r'^prepare$', 'prepare.views.index'),
-    #url(r'^prepare/new$', 'prepare.views.new'),
-
-    # Create IP URLS:
-    #url(r'^create$', 'create.views.index'), ##
-    #url(r'^create/(?P<id>\d+)$', 'create.views.manageip'),
-    #url(r'^create/(?P<id>\d+)/create$', 'create.views.createip'),
-    #url(r'^create/(?P<id>\d+)/status$', 'create.views.ipstatus'),
-    #url(r'^create/(?P<id>\d+)/delete$', 'create.views.deleteip'),
-    #url(r'^create/(?P<id>\d+)/fail$', 'create.views.failip'),
-    #url(r'^create/(?P<id>\d+)/progress$', 'create.views.getprogress'),
-    #url(r'^create/status$', 'create.views.createip'),
-    #url(r'^status$', 'create.views.createip'), ##
-    #url(r'^create/list$', 'create.views.listIPs'),
-    #url(r'^create/(?P<id>\d+)$', 'create.views.createip'), ##
-    #url(r'^create/view$', 'create.views.viewIPs'), ##
-    #url(r'^create_upload/?$', CreateTmpWorkareaUploadView.as_view(), name='chunked_upload'),
-    #url(r'^create_upload_complete/?$', CreateTmpWorkareaUploadCompleteView.as_view(), name='chunked_upload_complete'),
-    url(r'^directoryinfo/(?P<ipid>[^&]*)$', IPcontentasJSON.as_view(), name='directoryinfo'), 
-    url(r'^etp_upload/?$', ETPUploadView.as_view(), name='etp_chunked_upload'),
-    #url(r'^etp_upload_complete/?$', ETPUploadCompleteView.as_view(), name='etp_chunked_upload_complete'), 
-    url(r'^etp_upload_complete/(?P<ipid>[^&]*)$', ETPUploadCompleteView.as_view(), name='etp_chunked_upload_complete'),
-    #url(r'^create/view/(?P<uuid>[^//]+)/(?P<creator>[^//]+)/(?P<label>[^//]+)/(?P<startdate>[^//]+)/(?P<enddate>[^//]+)/(?P<iptype>[^//]+)/(?P<createdate>[^//]+)/(?P<state>[^//]+)$', 'create.views.viewIPs'),
-        
-    # Deliver IP URLS:
-    #url(r'^prepare$', 'prepare.views.index'),
-    url(r'^deliver$', 'deliver.views.index'),
-    url(r'^deliver/(?P<id>\d+)$', 'deliver.views.deliverip'),
-
-    # Log Events URLS:
-    url(r'^logevents$', 'logevents.views.index'),
-    url(r'^logevents/create$', 'logevents.views.createlog'),
-    url(r'^logevents/list$', 'logevents.views.listlog'),
-    #url(r'^logevents/view/(?P<uuid>[^//]+)/(?P<creator>[^//]+)/(?P<system>[^//]+)/(?P<version>[^//]+)$', 'logevents.views.viewlog'),
-#    url(r'^logevents/view/(?P<uuid>[^//]+)/(?P<archivist_organization>[^//]+)/(?P<label>[^//]+)/(?P<startdate>[^//]+)/(?P<enddate>[^//]+)/(?P<iptype>[^//]+)/(?P<createdate>[^//]+)$', 'logevents.views.viewlog'),
-    url(r'^logevents/view/(?P<uuid>[^//]+)/(?P<archivist_organization>[^//]+)/(?P<label>[^//]+)/(?P<iptype>[^//]+)/(?P<createdate>[^//]+)$', 'logevents.views.viewlog'),    url(r'^logevents/out$', 'logevents.views.listlog'),
-    #url(r'^logevents/view$', 'logevents.views.viewlog'),
-#    url(r'^logevents/(?P<id>\d+)$', 'logevents.views.viewlog'), ##
-        
-    # Uncomment the next line to enable the admin:
-    url(r'^admin/', include(admin.site.urls)),
-
-    #url(r'^accounts/login/$', 'django.contrib.auth.views.login' ),
-    #url(r'^logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'})
-    #url(r'^accounts/login/$', 'django.contrib.auth.views.login'),
-    #url(r'^accounts/logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'} ),
-
+from ESSArch_Core.configuration.views import (
+    AgentViewSet,
+    EventTypeViewSet,
+    ParameterViewSet,
+    PathViewSet,
+    SysInfoView,
 )
+
+from ip.views import (
+    ArchivalInstitutionViewSet,
+    ArchivistOrganizationViewSet,
+    ArchivalTypeViewSet,
+    ArchivalLocationViewSet,
+    EventIPViewSet,
+    InformationPackageViewSet,
+)
+
+from preingest.views import (
+    GroupViewSet,
+    PermissionViewSet,
+    ProcessStepViewSet,
+    ProcessTaskViewSet,
+    UserViewSet,
+)
+
+from profiles.views import (
+    ProfileViewSet,
+    ProfileSAViewSet,
+    ProfileIPViewSet,
+    SubmissionAgreementViewSet,
+)
+
+admin.site.site_header = 'ESSArch Tools Producer Administration'
+admin.site.site_title = 'ESSArch Tools Producer Administration'
+
+router = routers.DefaultRouter()
+router.register(r'users', UserViewSet)
+router.register(r'groups', GroupViewSet)
+router.register(r'permissions', PermissionViewSet)
+router.register(r'archival-institutions', ArchivalInstitutionViewSet)
+router.register(r'archivist-organizations', ArchivistOrganizationViewSet)
+router.register(r'archival-types', ArchivalTypeViewSet)
+router.register(r'archival-locations', ArchivalLocationViewSet)
+router.register(r'information-packages', InformationPackageViewSet)
+router.register(r'steps', ProcessStepViewSet)
+router.register(r'tasks', ProcessTaskViewSet)
+router.register(r'events', EventIPViewSet)
+router.register(r'event-types', EventTypeViewSet)
+router.register(r'submission-agreements', SubmissionAgreementViewSet)
+router.register(r'profiles', ProfileViewSet)
+router.register(r'profile-sa', ProfileSAViewSet)
+router.register(r'profile-ip', ProfileIPViewSet)
+router.register(r'agents', AgentViewSet)
+router.register(r'parameters', ParameterViewSet)
+router.register(r'paths', PathViewSet)
+
+urlpatterns = [
+    url(r'^', include('frontend.urls'), name='home'),
+    url(r'^admin/', admin.site.urls),
+    url(r'^api/sysinfo/', SysInfoView.as_view()),
+    url(r'^api/', include(router.urls)),
+    url(r'^accounts/changepassword', auth_views.password_change, {'post_change_redirect': '/'} ),
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    url(r'^template/', include('ESSArch_Core.essxml.ProfileMaker.urls')),
+    url(r'^accounts/login/$', auth_views.login),
+    url(r'^rest-auth/', include('rest_auth.urls')),
+    url(r'^rest-auth/registration/', include('rest_auth.registration.urls')),
+]
